@@ -163,7 +163,7 @@ void moveMesaNape(){
     int posMesa, posNaipe;
     tCarta *atualMesa, *antMesa, *atualNaipe, *antNaipe;
 
-    printf("\n-- MESA => TEMP --\n\n");
+    printf("\n-- MESA => NAIPE --\n\n");
 
     //Leitura das posições de Mesa e Naipe do movimento
     do{
@@ -177,11 +177,15 @@ void moveMesaNape(){
 
     //Encontrando o ultimo elemento da mesa indicada
     antMesa = NULL;
-    atualMesa = primMesa[posMesa];
-    while(atualMesa->prox != NULL){
-        antMesa = atualMesa;
-        atualMesa = atualMesa->prox;
+    atualMesa = NULL;
+    if(primMesa[posMesa] != NULL){
+        atualMesa = primMesa[posMesa];
+        while(atualMesa->prox != NULL){
+            antMesa = atualMesa;
+            atualMesa = atualMesa->prox;
+        }
     }
+    
     
     //Verificação de mesa vazia
     if(atualMesa != NULL){
@@ -191,7 +195,11 @@ void moveMesaNape(){
             if(atualMesa->num == 1){
                 primNaipe[posNaipe] = (tCarta *)malloc(sizeof(tCarta));
                 primNaipe[posNaipe] = atualMesa;
-                antMesa->prox = NULL;
+                if(antMesa == NULL){
+                    primMesa[posMesa] = NULL;
+                }else{
+                    antMesa->prox = NULL;
+                }
             }else{
                 red();
                 printf("A primeira carta deve ser um As (1)...");
@@ -213,7 +221,11 @@ void moveMesaNape(){
                 //Validação do naipe da pilha
                 if(atualMesa->naipe == atualNaipe->naipe){
                     atualNaipe->prox = atualMesa;
-                    antMesa->prox = NULL;
+                    if(antMesa == NULL){
+                        primMesa[posMesa] = NULL;
+                    }else{
+                        antMesa->prox = NULL;
+                    }
                 }else{
                     red();
                     printf("A carta da mesa deve possuir o mesmo naipe da pilha de naipes...");
@@ -260,15 +272,30 @@ void moveMesaTemp(){
         }while((posMesa < 0) || (posMesa > 7));
 
         ant = NULL;
-        atual = primMesa[posMesa];
+        atual = NULL;
+        if(primMesa[posMesa] != NULL){
+            atual = primMesa[posMesa];
 
-        //Atual = Ultima carta da mesa indicada
-        while(atual->prox != NULL){
-            ant = atual;
-            atual = atual->prox;
+            //Atual = Ultima carta da mesa indicada
+            while(atual->prox != NULL){
+                ant = atual;
+                atual = atual->prox;
+            }
+
+            temp[posTemp] = atual;
+            
+            if(ant != NULL){
+                ant->prox = NULL;
+            }else{
+                primMesa[posMesa] = NULL;
+            }
+        }else{
+            red();
+            printf("MESA vazia...");
+            reset();
+            getchar();
+            getchar();
         }
-        ant->prox = NULL;
-        temp[posTemp] = atual;
     }else{
         red();
         printf("TEMP cheio...");
@@ -295,32 +322,42 @@ void moveTempMesa(){
         }while((posMesa < 0) || (posMesa > 7));
 
         ant = NULL;
-        atual = primMesa[posMesa];
-        //Atual = Ultima carta da mesa indicada
-        while(atual->prox != NULL){
-            ant = atual;
-            atual = atual->prox;
+        atual = NULL;
+        if(primMesa[posMesa] != NULL){
+            atual = primMesa[posMesa];
+            //Atual = Ultima carta da mesa indicada
+            while(atual->prox != NULL){
+                ant = atual;
+                atual = atual->prox;
+            }
         }
-
+        
         //Prossegue se a mesa esta vazia ou possui uma carta maior que a selecionada
         if((atual == NULL) || (atual->num > temp[posTemp]->num)){
-            //Verificação das cores
-            if(((atual->naipe <= 4) && (temp[posTemp]->naipe > 4)) || ((atual->naipe > 4) && (temp[posTemp]->naipe <= 4))){
-                //Passando a carta do TEMP[i] p/ mesa indicada
-                tCarta *novo = (tCarta *)malloc(sizeof(tCarta));
-                novo->naipe = temp[posTemp]->naipe;
-                novo->num = temp[posTemp]->num;
-                novo->prox = NULL;
-                atual->prox = novo;
+            //Passando a carta do TEMP[i] p/ mesa indicada
+            tCarta *novo = (tCarta *)malloc(sizeof(tCarta));
+            novo->naipe = temp[posTemp]->naipe;
+            novo->num = temp[posTemp]->num;
+            novo->prox = NULL;
 
-                temp[posTemp] = NULL;
+            if(atual != NULL){
+                //Verificação das cores
+                if(((atual->naipe <= 4) && (temp[posTemp]->naipe > 4)) || ((atual->naipe > 4) && (temp[posTemp]->naipe <= 4))){
+                    atual->prox = novo;
+                    temp[posTemp] = NULL;
+                }else{
+                    red();
+                    printf("Cartas de mesma cor...");
+                    reset();
+                    getchar();
+                    getchar();
+                }
             }else{
-                red();
-                printf("Cartas de mesma cor...");
-                reset();
-                getchar();
-                getchar();
+                primMesa[posMesa] = (tCarta *)malloc(sizeof(tCarta));
+                primMesa[posMesa] = novo;
+                temp[posTemp] = NULL;
             }
+            
         }else{
             red();
             printf("Carta da mesa menor que a selecionada...");
