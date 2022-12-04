@@ -435,7 +435,7 @@ void moveTempNape(){
 
     printf("\n-- TEMP => NAIPE --\n\n");
 
-    //Leitura das posições de Mesa e Naipe do movimento
+    //Leitura das posições de Temp e Naipe do movimento
     do{
         printf("Temp: ");
         scanf("%d", &posTemp);
@@ -663,9 +663,16 @@ void moveMesaMesa(){
             }
         }
         
+        //Ajustando os ponteiros para o caso do movimento ocorrer somente com uma parte da sequência
+        if(atualMesa2 != NULL){
+            while ((atualMesa1->num >= atualMesa2->num) && (atualMesa1->prox != NULL)){
+                antMesa1 = atualMesa1;
+                atualMesa1 = atualMesa1->prox;
+            }
+        }
+
         //Prossegue se a mesa esta vazia ou possui uma carta subsequente maior que a selecionada
         if((atualMesa2 == NULL) || (atualMesa2->num == (atualMesa1->num + 1))){
-            //Passando a carta do naipe p/ mesa indicada
             tCarta *novo = (tCarta *)malloc(sizeof(tCarta));
             novo = atualMesa1;
 
@@ -779,7 +786,7 @@ int main(int argc, char **argv){
             }
         }else {
             red();
-            printf("Fim do Jogo!\n Parabens!!");
+            printf("Fim do Jogo!\nParabens!!");
             reset();
             getchar();
             op = 0;
